@@ -86,12 +86,13 @@ class szamlazz {
 
 	public static function generateXML($trs) {
 
-		$user = ""; $pw = ""; $et = ""; //éles
-		//$user = ""; $pw = ""; $et = ""; //teszt
+		$user = get_option("exp_szamlazz_user"); $pw = get_option("exp_szamlazz_pass"); $et = get_option("exp_szamlazz_et");
 		$id = $trs["Id"];
 		$xmlfile = dirname(__FILE__)."/szamlazz_log/szamla_{$id}.xml";
-		$netto = round($trs["CurrencyAmount"] * 0.7874);
-		$afa = $trs["CurrencyAmount"] - $netto;
+		if(!is_dir(dirname($xmlfile))) mkdir(dirname($xmlfile));
+		$nettoegys = round($trs["TotalAmount"] / $trs["Count"] * 0.7874);
+		$netto = round($trs["TotalAmount"] * 0.7874);
+		$afa = $trs["TotalAmount"] - $netto;
 		$date = substr($trs["Date"], 0, 10);
 		$xml = <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -121,19 +122,19 @@ class szamlazz {
 		<vegszamla>false</vegszamla>
 		<dijbekero>false</dijbekero>
 		<szamlaszamElotag>{$et}</szamlaszamElotag>
-		<fizetve>true</fizetve>
+		<fizetve>false</fizetve>
 	</fejlec>
 	<elado>
 	</elado>
 	<vevo>
-		<nev>{$trs["LastName"]} {$trs["FirstName"]}</nev>
-		<irsz>{$trs["ZipCode"]}</irsz>
-		<telepules>{$trs["City"]}</telepules>
-		<cim>{$trs["Address"]}</cim>
+		<nev>{$trs["BillingName"]}</nev>
+		<irsz>{$trs["BillingZipCode"]}</irsz>
+		<telepules>{$trs["BillingCity"]}</telepules>
+		<cim>{$trs["BillingAddress"]}</cim>
 		<email>{$trs["EmailAddress"]}</email>
 		<sendEmail>true</sendEmail>
 		<adoszam></adoszam>
-		<postazasiNev>{$trs["LastName"]} {$trs["FirstName"]}</postazasiNev>
+		<postazasiNev>{$trs["Name"]}</postazasiNev>
 		<postazasiIrsz>{$trs["ZipCode"]}</postazasiIrsz>
 		<postazasiTelepules>{$trs["City"]}</postazasiTelepules>
 		<postazasiCim>{$trs["Address"]}</postazasiCim>
@@ -143,14 +144,14 @@ class szamlazz {
 	</vevo>
 	<tetelek>
 		<tetel>
-			<megnevezes></megnevezes>
-			<mennyiseg>1.0</mennyiseg>
+			<megnevezes>{$trs["ProductName"]}</megnevezes>
+			<mennyiseg>{$trs["Count"]}</mennyiseg>
 			<mennyisegiEgyseg>db</mennyisegiEgyseg>
-			<nettoEgysegar>{$netto}</nettoEgysegar>
+			<nettoEgysegar>{$nettoegys}</nettoEgysegar>
 			<afakulcs>27</afakulcs>
 			<nettoErtek>{$netto}</nettoErtek>
 			<afaErtek>{$afa}</afaErtek>
-			<bruttoErtek>{$trs["CurrencyAmount"]}</bruttoErtek>
+			<bruttoErtek>{$trs["TotalAmount"]}</bruttoErtek>
 			<megjegyzes></megjegyzes>
 		</tetel>
 	</tetelek>
